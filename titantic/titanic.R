@@ -60,4 +60,8 @@ str(full$Fsize)
 full$Family <- paste(full$Surname, full$Fsize, sep = '_')
 str(full$Family)
 #### use http://www.stat.wisc.edu/~larget/stat302/chap2.pdf to understand ggplot
-
+ggplot(full[1:891,], aes(x = Fsize, fill = factor(Survived))) +
+  geom_bar(stat='count', position='dodge') +
+  scale_x_continuous(breaks=c(1:11)) +
+  labs(x = 'Family Size') +
+  theme_few()
