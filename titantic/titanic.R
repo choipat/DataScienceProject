@@ -65,3 +65,4 @@ ggplot(full[1:891,], aes(x = Fsize, fill = factor(Survived))) +
   scale_x_continuous(breaks=c(1:11)) +
   labs(x = 'Family Size') +
   theme_few()
+###aes = aesthetics
