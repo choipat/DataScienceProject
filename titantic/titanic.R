@@ -46,7 +46,8 @@ full$Title[full$Title %in% rare_title] <- 'Rare Title'
 table(full$Sex, full$Title)
 
 #grab surname from passenger name
-full$Surname <- sapply(full$Name, function(x) strsplit(x, split = '[,.]')[[1]][1])
+full$Surname <- sapply(full$Name, function(x) strsplit(x, split = '[,]')[[1]][1])
+full$Surname
 cat(paste('We have <b>', nlevels(factor(full$Surname)), '</b> unique surnames. I would be interested to infer ethnicity based on surnmae -- another time.'))
 
 #full$Surname <- sapply(full$Name,function(x) strsplit(x, split = '[,.]')[[1]][1])
@@ -66,3 +67,56 @@ ggplot(full[1:891,], aes(x = Fsize, fill = factor(Survived))) +
   labs(x = 'Family Size') +
   theme_few()
 ###aes = aesthetics
+
+####2.3 Treat a few more variables
+#probably useful informatin in the passenger cabin variable, including their deck.
+full$Cabin[1:28]
+strsplit(full$Cabin[2], NULL)[[1]]
+full$Deck<-factor(sapply(full$Cabin, function(x) strsplit(x, NULL)[[1]][1]))
+full$Deck
+##strsplit practice
+#so strsplit splits the vectors in a word. strsplit(x, split, fixed=FALSE)
+#x = the string
+#split = the character string to split. if the split is an empty string(""), then x is split between
+#every character
+x<- "Split the words in a sentence."
+strsplit(x, NULL)
+x<- "Do you wish you were Mr. Jones?"
+strsplit(x, NULL)[[1]]
+strsplit(full$Cabin[2], NULL)
+full$Deck
+
+###############3.1 Sensible value imputation###########
+##passengers 62 and 830 are missing EMbarkment
+full[c(62, 830), 'Embarked']
+cat(paste('We will infer their values for **embarkment** based on present data that we can imagine may be relevant: 
+          **passenger class** and **fare**. We see that they paid<b> $', full[c(62, 830), 'Fare']
+          [[1]][1], '</b>and<b> $', full[c(62, 830), 'Fare'][[1]][2], '</b>respectively and their classes are<b>', 
+          full[c(62, 830), 'Pclass'][[1]][1], '</b>and<b>', full[c(62, 830), 'Pclass'][[1]][2], '</b>. 
+          So from where did they embark?'))
+#we will infer their values for embarkment based on present data that we can 
+#imagine may be relevant: passenger class and fare. We see that they paid $80 and $80 
+#respectively and their classes are 1 and 1. so from where did they embark?
+#get rid of our missing passenger IDs
+embark_fare <- full %>%
+  filter(PassengerId != 62 & PassengerId != 830)
+ggplot(embark_fare, aes(x = Embarked, y = Fare, fill= factor(Pclass)))
+
+geom_boxplot() 
+  geom_hline(aes(yintercept=80), 
+             colour = 'red', linetype='dashed', lwd=2) 
+    scale_y_continuous(labels=dollar_format()) 
+  theme_few()
+  # Get rid of our missing passenger IDs
+  embark_fare <- full %>%
+    filter(PassengerId != 62 & PassengerId != 830)
+### this line works. Figure out why the previous line didnt. 
+  # Use ggplot2 to visualize embarkment, passenger class, & median fare
+  ggplot(embark_fare, aes(x = Embarked, y = Fare, fill = factor(Pclass))) +
+    geom_boxplot() +
+    geom_hline(aes(yintercept=80), 
+               colour='red', linetype='dashed', lwd=2) +
+    scale_y_continuous(labels=dollar_format()) +
+    theme_few()
+
+  
